@@ -186,24 +186,6 @@ class ViewsTests(TestCase):
             'Страница не найдена'
         )
 
-    # def test_view_post_with_follow(self):
-    #     new_group = self.new_group('group_1')
-    #     new_group.save()
-    #     username_1 = 'User-1'
-    #     authorized_client = self.new_authorized_client(username_1)
-    #     username_2 = 'User-2'
-    #     second_authorized_client = self.new_authorized_client(username_2)
-    #     authorized_client.get(reverse(
-    #         'profile_follow', kwargs={'username': username_2}))
-    #     second_authorized_client.post(
-    #         reverse('new_post'),
-    #         {'text': 'Это текст публикации второго пользователя',
-    #         'group': new_group.id},
-    #         follow=True)
-    #     response = authorized_client.get(reverse('follow_index'))
-    #     self.assertContains(
-    #             response, 'Это текст публикации второго пользователя')
-
     def test_auth_follow_other_users(self):
         author = User.objects.create(username="Tester")
         follower_name = 'User-1'
