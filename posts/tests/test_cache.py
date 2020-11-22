@@ -4,10 +4,7 @@ from django.core.cache.utils import make_template_fragment_key
 from django.test import TransactionTestCase, Client
 from django.urls import reverse
 
-from posts.models import Post, Group
-
-
-User = get_user_model()
+from posts.models import Group, Post, User
 
 
 class CachIndexTest(TransactionTestCase):
@@ -15,19 +12,17 @@ class CachIndexTest(TransactionTestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.key = make_template_fragment_key('index_page')
-        cls.user = User.objects.create_user(username='User-1')
+        cls.user = User.objects.create(username='User-1')
         cls.authorized_client = Client()        
         cls.authorized_client.force_login(cls.user)
-        cls.unauthorized_client = Client()
 
     def test_cache_after_time(self):
-        author = self.user
         response_before = self.authorized_client.get(reverse('index'))
         new_group = Group(title='Тестовая группа', slug='testgroup', id=1)
         new_group.save()
         new_post = Post.objects.create(
             text='Пост авторизованного пользователя', 
-            author=author,
+            author=self.user,
             group=new_group,
         )
         response_after = self.authorized_client.get(reverse('index'))

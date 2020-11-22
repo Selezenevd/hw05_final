@@ -1,5 +1,6 @@
 from posts.forms import PostForm
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import response
 from django.test import Client
 from django.test import TestCase
@@ -38,17 +39,24 @@ class ImageTests(TestCase):
         author = User.objects.get(username=username)
         new_group = self.new_group('group_1')
         new_group.save()
-        with open('./media/posts/Sunset.jpg','rb') as img: 
-            authorized_client.post( 
-                reverse('new_post'), 
-                {
-                    'text': 'Пост авторизованного пользователя', 
-                    'author': author, 
-                    'group': new_group.id,
-                    'image': img
-                }, 
-                follow=True 
-            )
+        small_gif = (b'\x47\x49\x46\x38\x39\x61\x02\x00'
+                b'\x01\x00\x80\x00\x00\x00\x00\x00'
+                b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+                b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+                b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+                b'\x0A\x00\x3B'
+        )
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
+        Post.objects.create(
+            text='Пост авторизованного пользователя', 
+            author=author, 
+            group=new_group,
+            image=uploaded,
+        )
         self.assertEqual(Post.objects.count(), 1)
         post = Post.objects.last()
         urls = [
@@ -58,8 +66,9 @@ class ImageTests(TestCase):
             reverse('group', kwargs={'slug': 'group_1'}),
         ]
         for url in urls:
-            response = authorized_client.get(url)
-            self.assertContains(response, '<img')
+            with self.subTest(url=url):
+                response = authorized_client.get(url)
+                self.assertContains(response, '<img')
     
     def test_post_with_not_image(self):
         self.assertEqual(Post.objects.count(), 0)

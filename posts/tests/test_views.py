@@ -3,10 +3,7 @@ from django.test import Client
 from django.test import TestCase
 from django.urls import reverse
 
-from posts.models import Follow, Group, Post, Comment
-
-
-User = get_user_model()
+from posts.models import  Comment, Follow, Group, Post, User
 
 
 class ViewsTests(TestCase):
@@ -20,14 +17,6 @@ class ViewsTests(TestCase):
             slug=slug,
         )
 
-    def new_authorized_client(self, username):
-        user = User.objects.create(username=username)
-        user.save()
-
-        client = Client()
-        client.force_login(user)
-        return client
-    
     def new_authorized_client(self, username):
         user = User.objects.create(username=username)
         user.save()
@@ -198,7 +187,9 @@ class ViewsTests(TestCase):
             )
         )
         self.assertEqual(author.following.count(), 1)
-        follow_exists = Follow.objects.filter(author_id=author.id, user__username=follower_name).exists()
+        follow_exists = Follow.objects.filter(
+            author=author, 
+            user__username=follower_name).exists()
         self.assertTrue(follow_exists)
 
     def test_auth_follow_self(self):

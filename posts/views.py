@@ -14,7 +14,10 @@ def index(request):
     return render(
         request,
         "index.html",
-        {'page': page, 'paginator': paginator}
+        {
+            'page': page, 
+            'paginator': paginator
+        }
     )
 
 
@@ -31,7 +34,8 @@ def group_posts(request, slug):
             'group': group,
             'posts': posts,
             'page': page, 
-            'paginator': paginator},
+            'paginator': paginator
+        },
     )
 
 
@@ -59,7 +63,11 @@ def profile(request, username):
         'author': author,
         'following': following,
     }    
-    return render(request, 'profile.html', context)
+    return render(
+        request, 
+        'profile.html', 
+        context
+    )
  
  
 def post_view(request, username, post_id):
@@ -73,7 +81,11 @@ def post_view(request, username, post_id):
         'form': form,
         'comments': comments,
     }
-    return render(request, 'post.html', context)
+    return render(
+        request, 
+        'post.html', 
+        context
+    )
 
 
 @login_required
@@ -81,7 +93,11 @@ def post_edit(request, username, post_id):
     post = get_object_or_404(Post, author__username=username, pk=post_id)
     if post.author != request.user:
         return redirect('post', username=username, post_id=post_id)
-    form = PostForm(request.POST or None, files=request.FILES or None, instance=post)
+    form = PostForm(
+        request.POST or None, 
+        files=request.FILES or None, 
+        instance=post
+    )
     if form.is_valid():
         form.save()
         return redirect('post', username=username, post_id=post_id)
@@ -97,12 +113,13 @@ def post_edit(request, username, post_id):
 
 @login_required
 def add_comment(request, username, post_id):
+    post = get_object_or_404(Post, author__username=username, pk=post_id)
     form = CommentForm(request.POST or None)
     if form.is_valid():
-        new_form = form.save(commit=False)
-        new_form.author = request.user
-        new_form.post = get_object_or_404(Post, author__username=username, pk=post_id)
-        new_form.save()
+        new_comment = form.save(commit=False)
+        new_comment.author = request.user
+        new_comment.post = post
+        new_comment.save()
     return redirect('post', username=username, post_id=post_id)
     
 
@@ -118,7 +135,11 @@ def page_not_found(request, exception):
 
 
 def server_error(request):
-    return render(request, "misc/500.html", status=500)
+    return render(
+        request, 
+        "misc/500.html", 
+        status=500
+    )
 
 
 @login_required
@@ -131,21 +152,24 @@ def follow_index(request):
     return render(
         request, 
         'follow.html', 
-        {'page': page, 'paginator': paginator},
-        )
+        {
+            'page': page, 
+            'paginator': paginator
+        },
+    )
 
 
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    if request.user != author:
+    following = author.following.exists()
+    if request.user != author and not following:
         Follow.objects.get_or_create(user=request.user, author=author)
     return redirect("profile", username)
-
 
 
 @login_required
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
-    Follow.objects.filter(user=request.user, author=author).delete()
+    get_object_or_404(Follow,user=request.user, author=author).delete()
     return redirect("profile", username=username)

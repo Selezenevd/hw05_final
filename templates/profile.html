@@ -14,7 +14,7 @@
                     </div>
                     <div class="h3 text-muted">
                         <!-- username автора -->
-                        {{author.username}}
+                        @{{author.username}}
                     </div>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -40,17 +40,16 @@
                 <div class="card mb-3 mt-1 shadow-sm">
                     {% include "post_item.html" with post=post %}
                     <li class="list-group-item">
-                        {% if following %}
                         <a class="btn btn-lg btn-light" 
-                                href="{% url 'profile_unfollow' author.username %}" role="button"> 
-                                Отписаться 
-                        </a> 
-                        {% else %}
-                        <a class="btn btn-lg btn-primary" 
-                                href="{% url 'profile_follow' author.username %}" role="button">
-                        Подписаться 
-                        </a>
-                        {% endif %}
+                            href=
+                            {% if following %}
+                                "{% url 'profile_unfollow' author.username %}" 
+                            {% else %}
+                                "{% url 'profile_follow' author.username %}" 
+                            {% endif %}
+                            role="button"> 
+                            {{following|yesno:'Отписаться,Подписаться'}}
+                        </a>  
                     </li>
                 </div>
             </div>
