@@ -1,4 +1,3 @@
-from posts.forms import PostForm
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import response
@@ -52,7 +51,7 @@ class ImageTests(TestCase):
             content_type='image/gif'
         )
         Post.objects.create(
-            text='Пост авторизованного пользователя', 
+            text='Новый пост', 
             author=author, 
             group=new_group,
             image=uploaded,
@@ -77,16 +76,20 @@ class ImageTests(TestCase):
         author = User.objects.get(username=username)
         new_group = self.new_group('group_1')
         new_group.save()
-        with open('./media/posts/some_text.txt','rb') as not_img: 
-            response = authorized_client.post( 
-                reverse('new_post'), 
-                {
-                    'text': 'Пост авторизованного пользователя',
-                    'author': author, 
-                    'group': new_group.id, 
-                    'image': not_img,
-                }, 
-                follow=True 
+        txt_file = SimpleUploadedFile(
+            'test.txt', 
+            b'this is text not image',
+            content_type='text/plain'
+        )
+        response = authorized_client.post( 
+            reverse('new_post'), 
+            {
+                'text': 'Пост авторизованного пользователя',
+                'author': author, 
+                'group': new_group.id, 
+                'image': txt_file,
+            }, 
+            follow=True 
             )
         self.assertFormError(
             response, 
@@ -95,4 +98,3 @@ class ImageTests(TestCase):
             'Загрузите правильное изображение. ' 
             'Файл, который вы загрузили, поврежден или не является изображением.'
         )
-    

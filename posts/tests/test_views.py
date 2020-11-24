@@ -214,21 +214,15 @@ class ViewsTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_auth_unfollow(self):
-        follower_name = 'User-1'
-        authorized_client = self.new_authorized_client(follower_name)
-        author = User.objects.create(username="Tester")
-        self.assertEqual(author.following.count(), 0)
-        authorized_client.get(
-            reverse(
-                "profile_follow",
-                kwargs={"username": author},
-            )
-        )
-        self.assertEqual(author.following.count(), 1)
-        authorized_client.get(
+        author = User.objects.create(username="Author")
+        subscriber = User.objects.create(username="my-user1")
+        subscription = Follow.objects.create(user=subscriber, author=author)
+        client = Client()
+        client.force_login(subscriber)   
+        client.get(
             reverse(
                 "profile_unfollow",
-                kwargs={"username": author},
+                kwargs={"username": author.username},
             )
         )
         self.assertEqual(author.following.count(), 0)
@@ -237,18 +231,18 @@ class ViewsTests(TestCase):
         author = User.objects.create(username="Author")
         subscriber = User.objects.create(username="User-1")
         not_subscriber = User.objects.create(username="User-2")
-        subscription = Follow.objects.create(subscriber, author)
+        subscription = Follow.objects.create(user=subscriber, author=author)
         author_post = Post.objects.create(
             text='Пост автора', 
             author=author,
         )
         with self.subTest(subscriber.username):
             client = self.new_authorized_client(subscriber.username) 
-            response = client.get('follow_index')
+            response = client.get(reverse('follow_index'))
             self.assertContains(response.context['page'], author_post)
         with self.subTest(not_subscriber.username):
             client = self.new_authorized_client(not_subscriber.username) 
-            response = client.get('follow_index')
+            response = client.get(reverse('follow_index'))
             self.assertNotContains(response.context['page'], author_post)
 
     def view_auth_add_comment(self):
@@ -290,4 +284,3 @@ class ViewsTests(TestCase):
             {'text': 'Новый комментарий'},
         )
         self.assertEqual(Comment.objects.count(), 0)
-        

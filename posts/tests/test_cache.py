@@ -12,7 +12,7 @@ class CachIndexTest(TransactionTestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.key = make_template_fragment_key('index_page')
-        cls.user = User.objects.create(username='User-1')
+        cls.user = User.objects.create_user(username='User-1')
         cls.authorized_client = Client()        
         cls.authorized_client.force_login(cls.user)
 
@@ -21,7 +21,7 @@ class CachIndexTest(TransactionTestCase):
         new_group = Group(title='Тестовая группа', slug='testgroup', id=1)
         new_group.save()
         new_post = Post.objects.create(
-            text='Пост авторизованного пользователя', 
+            text='Новый пост', 
             author=self.user,
             group=new_group,
         )

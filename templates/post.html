@@ -20,7 +20,7 @@
                     <li class="list-group-item">
                         <div class="h6 text-muted">
                             Подписчиков: {{user.follower.count}} <br />
-                            Подписан: {{following|yesno:'да,нет'}}
+                            Подписан: {{ post.author.following.count }}
                         </div>
                     </li>
                     <li class="list-group-item">
