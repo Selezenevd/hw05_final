@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.test import TransactionTestCase, Client
@@ -16,18 +15,24 @@ class CachIndexTest(TransactionTestCase):
         cls.authorized_client = Client()        
         cls.authorized_client.force_login(cls.user)
 
-    def test_cache_after_time(self):
-        response_before = self.authorized_client.get(reverse('index'))
-        new_group = Group(title='Тестовая группа', slug='testgroup', id=1)
+    def test_cache(self):
+        # Лента "до"
+        response_get_before = self.authorized_client.get(reverse('index'))
+        # Создаем новый пост
+        new_group = Group(title='Тестовая группа', slug='testgroup')
         new_group.save()
         new_post = Post.objects.create(
             text='Новый пост', 
             author=self.user,
             group=new_group,
         )
-        response_after = self.authorized_client.get(reverse('index'))
-        self.assertEqual(response_before.content, response_after.content)
-        cache.touch(self.key, 0)
-        response_last = self.authorized_client.get(reverse('index'))
-        self.assertNotEqual(response_before.content, response_last.content)
+        # Лента "после"
+        response_get_after = self.authorized_client.get(reverse('index'))
+        # Сравнение лент
+        self.assertEqual(response_get_before.content, response_get_after.content)
+        # Чистим кэш
+        cache.clear()
+        # Лента после очистки кэша
+        response_cach_cleared = self.authorized_client.get(reverse('index'))
+        self.assertNotEqual(response_get_before.content, response_cach_cleared.content)
         

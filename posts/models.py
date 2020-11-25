@@ -37,13 +37,11 @@ class Post(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return (
-            self.group.title, 
-            self.author.username, 
-            self.pub_date.strftime('%m/%d/%Y'),
-            self.text[:100], 
-        )
-
+        # return (f'{self.group.title}, '
+        #         f'{self.author.username}, '
+        #         f'{self.pub_date.strftime}, '
+        #         f'{self.text[:100]}')
+        return self.text
 
 class Comment(models.Model):
     post = models.ForeignKey(

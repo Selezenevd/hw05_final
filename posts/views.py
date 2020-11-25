@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
@@ -47,6 +48,7 @@ def new_post(request):
     post = form.save(commit=False)
     post.author = request.user
     post.save()
+    cache.clear()
     return redirect('index')
 
 

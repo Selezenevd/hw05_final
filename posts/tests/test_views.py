@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import Client
 from django.test import TestCase
 from django.urls import reverse
@@ -119,8 +119,11 @@ class ViewsTests(TestCase):
             reverse('index'), 
             reverse('profile', kwargs={'username': username}), 
         ]
+        cache.clear()
         for url in urls:
+            cache.clear()
             with self.subTest(url=url):
+                cache.clear() 
                 response = client.get(url)
                 self.assertIn(new_post, response.context['page'].object_list)
         post_url = reverse(
